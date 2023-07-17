@@ -9,57 +9,63 @@ const rl = readline.createInterface({
 // Lista de tareas
 const tasks = [];
 
-// Función para añadir una tarea
+// Función para añadir una tarea (retorna una promesa)
 function addTask() {
-  rl.question('Introduce el indicador de la tarea: ', (indicator) => {
-    rl.question('Introduce la descripción de la tarea: ', (description) => {
-      const task = {
-        indicator,
-        description,
-        completed: false
-      };
-      tasks.push(task);
-      console.log('Tarea añadida con éxito.');
-      showMenu();
+  return new Promise((resolve) => {
+    rl.question('Introduce el indicador de la tarea: ', (indicator) => {
+      rl.question('Introduce la descripción de la tarea: ', (description) => {
+        const task = {
+          indicator,
+          description,
+          completed: false
+        };
+        tasks.push(task);
+        console.log('Tarea añadida con éxito.');
+        resolve();
+      });
     });
   });
 }
 
-// Función para eliminar una tarea
+// Función para eliminar una tarea (retorna una promesa)
 function deleteTask() {
-  if (tasks.length === 0) {
-    console.log('La lista de tareas está vacía.');
-    showMenu();
-    return;
-  }
-
-  rl.question('Introduce el índice de la tarea que deseas eliminar: ', (index) => {
-    if (index >= 0 && index < tasks.length) {
-      tasks.splice(index, 1);
-      console.log('Tarea eliminada con éxito.');
-    } else {
-      console.log('El índice de tarea es inválido.');
+  return new Promise((resolve) => {
+    if (tasks.length === 0) {
+      console.log('La lista de tareas está vacía.');
+      resolve();
+      return;
     }
-    showMenu();
+
+    rl.question('Introduce el índice de la tarea que deseas eliminar: ', (index) => {
+      if (index >= 0 && index < tasks.length) {
+        tasks.splice(index, 1);
+        console.log('Tarea eliminada con éxito.');
+      } else {
+        console.log('El índice de tarea es inválido.');
+      }
+      resolve();
+    });
   });
 }
 
-// Función para marcar una tarea como completada
+// Función para marcar una tarea como completada (retorna una promesa)
 function completeTask() {
-  if (tasks.length === 0) {
-    console.log('La lista de tareas está vacía.');
-    showMenu();
-    return;
-  }
-
-  rl.question('Introduce el índice de la tarea que deseas marcar como completada: ', (index) => {
-    if (index >= 0 && index < tasks.length) {
-      tasks[index].completed = true;
-      console.log('Tarea completada con éxito.');
-    } else {
-      console.log('El índice de tarea es inválido.');
+  return new Promise((resolve) => {
+    if (tasks.length === 0) {
+      console.log('La lista de tareas está vacía.');
+      resolve();
+      return;
     }
-    showMenu();
+
+    rl.question('Introduce el índice de la tarea que deseas marcar como completada: ', (index) => {
+      if (index >= 0 && index < tasks.length) {
+        tasks[index].completed = true;
+        console.log('Tarea completada con éxito.');
+      } else {
+        console.log('El índice de tarea es inválido.');
+      }
+      resolve();
+    });
   });
 }
 
@@ -82,31 +88,48 @@ function showMenu() {
   console.log('4. Mostrar tareas');
   console.log('5. Salir');
 
-  rl.question('Elige una opción: ', (option) => {
+  return new Promise((resolve) => {
+    rl.question('Elige una opción: ', (option) => {
+      resolve(option);
+    });
+  });
+}
+
+// Función principal (asíncrona)
+async function main() {
+  let option = '';
+
+  while (option !== '5') {
+    option = await showMenu();
+
     switch (option) {
       case '1':
-        addTask();
+        await addTask();
         break;
       case '2':
-        deleteTask();
+        await deleteTask();
         break;
       case '3':
-        completeTask();
+        await completeTask();
         break;
       case '4':
         showTasks();
-        showMenu();
         break;
       case '5':
         rl.close();
         break;
       default:
         console.log('Opción inválida. Inténtalo de nuevo.');
-        showMenu();
         break;
     }
-  });
+  }
 }
 
-// se Iniciara el programa mostrando el menú de opciones
-showMenu();
+// Inicia el programa
+main()
+  .then(() => {
+    console.log('Programa finalizado.');
+  })
+  .catch((error) => {
+    console.log('Ocurrió un error en el programa:', error);
+  });
